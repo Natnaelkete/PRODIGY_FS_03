@@ -12,11 +12,11 @@ import useProduct from "../../hooks/products/useProduct";
 
 function Product() {
   const { dark } = useTheme();
-  console.log(dark);
   const [layout, setLayout] = useState("list");
 
   const navigate = useNavigate();
 
+  // eslint-disable-next-line
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { productData: data, isLoading } = useProduct({
@@ -24,7 +24,6 @@ function Product() {
     shipping: searchParams.get("shipping"),
     search: searchParams.get("search") || "",
   });
-  console.log(data);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

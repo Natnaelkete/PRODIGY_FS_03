@@ -4,10 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useGetOrders from "../../hooks/orders/useGetOrders";
 
 function Order() {
-  // const checkout = useSelector((state) => state.checkout.info);
-  // const cart = useSelector((state) => state.cart.orders);
   const { orders } = useGetOrders();
-  console.log(orders);
 
   const { info } = JSON.parse(localStorage.getItem("info")) || {
     info: [],
@@ -42,7 +39,11 @@ function Order() {
                   <td></td>
                   <td>{item.user.name}</td>
                   <td>{item.address}</td>
-                  <td>{item.cart.map((prod) => prod.title).join(", ")}</td>
+                  <td>
+                    {item.cart
+                      .map((prod) => prod.title || prod.name)
+                      .join(", ")}
+                  </td>
                   <td>
                     {formatCurrency(
                       item.cart
