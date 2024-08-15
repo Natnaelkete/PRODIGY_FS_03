@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, useLocation, useNavigate } from "react-router-dom";
+import { Form, useNavigate, useSearchParams } from "react-router-dom";
 import { BsFillGridFill, BsList } from "react-icons/bs";
 import { useTheme } from "../../ui/useThemetoggler";
 
@@ -7,10 +7,6 @@ import Spinner from "../../ui/Spinner";
 import ProductList from "./ProductLists";
 import ProductGrid from "./ProductGrids";
 import ProductRange from "./ProductRange";
-
-import ProductSelector from "./ProductSelector";
-
-import useGetFilteredProduct from "../../hooks/products/getFilteredProduct";
 import Pagination from "../../ui/Pagination";
 import useProduct from "../../hooks/products/useProduct";
 
@@ -20,10 +16,15 @@ function Product() {
   const [layout, setLayout] = useState("list");
 
   const navigate = useNavigate();
-  const { search } = useLocation();
 
-  // const { isLoading, data, error } = useGetFilteredProduct(search);
-  const { productData: data, isLoading } = useProduct();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { productData: data, isLoading } = useProduct({
+    maxPrice: searchParams.get("maxPrice"),
+    shipping: searchParams.get("shipping"),
+    search: searchParams.get("search") || "",
+  });
+  console.log(data);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -31,10 +32,7 @@ function Product() {
 
     const newSearchParams = {
       search: formData.get("search"),
-      category: `${formData.get("category")}`,
-      company: formData.get("company"),
-      order: formData.get("order"),
-      price: formData.get("price"),
+      maxPrice: formData.get("price"),
       shipping: formData.get("shipping") === "on" ? true : false,
     };
 
@@ -68,21 +66,6 @@ function Product() {
             />
           </label>
         </div>
-        <ProductSelector
-          label="Select category"
-          list={data.meta.categories}
-          name={"category"}
-        />
-        <ProductSelector
-          label="Select company"
-          list={data.meta.companies}
-          name={"company"}
-        />
-        <ProductSelector
-          label="Sort by"
-          name="order"
-          list={["a-z", "z-a", "high", "low"]}
-        />
         <div>
           <ProductRange />
         </div>
@@ -126,9 +109,9 @@ function Product() {
         </div>
         <hr className="mb-20 mt-5 border-gray-200 dark:border-gray-700" />
         {layout === "list" ? (
-          <ProductGrid productData={data} />
+          <ProductGrid productData={data.products} />
         ) : (
-          <ProductList productData={data} />
+          <ProductList productData={data.products} />
         )}
       </div>
       <Pagination productData={data} />

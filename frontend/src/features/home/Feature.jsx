@@ -8,7 +8,7 @@ function Feature() {
 
   if (isLoading) return <Spinner />;
 
-  const limitedProductData = productData.slice(1, 4);
+  const limitedProductData = productData.products.slice(1, 4);
 
   return (
     <div>

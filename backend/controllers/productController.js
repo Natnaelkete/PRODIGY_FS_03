@@ -45,17 +45,57 @@ export const topProducts = asyncHandler(async (req, res, next) => {
 
 export const getProduct = asyncHandler(async (req, res, next) => {
   try {
-    const product = await Product.find({})
-      .sort(req.query.sort)
-      .limit(parseInt(req.query.limit));
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const page = parseInt(req.query.page) || 1;
 
-    if (!product || product.length === 0) {
-      res.status(200).json([]);
+    let filters = {};
+
+    if (req.query.search) {
+      filters.name = { $regex: req.query.search, $options: "i" };
     }
 
-    res.status(200).json(product);
+    if (req.query.minPrice || req.query.maxPrice) {
+      filters.price = {};
+      if (req.query.minPrice) {
+        filters.price.$gte = Number(req.query.minPrice);
+      }
+      if (req.query.maxPrice) {
+        filters.price.$lte = Number(req.query.maxPrice);
+      }
+    }
+
+    if (req.query.shipping) {
+      filters.shipping = req.query.shipping === "true";
+    }
+
+    let sort = {};
+    if (req.query.sort === "name-asc") {
+      sort.name = 1;
+    } else if (req.query.sort === "name-desc") {
+      sort.name = -1;
+    } else if (req.query.sort) {
+      sort[req.query.sort] = 1;
+    }
+
+    const count = await Product.countDocuments(filters);
+
+    const products = await Product.find(filters)
+      .sort(sort)
+      .limit(pageSize)
+      .skip(pageSize * (page - 1));
+
+    if (!products || products.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json({
+      products,
+      page,
+      pages: Math.ceil(count / pageSize),
+      totalProducts: count,
+    });
   } catch (error) {
-    console.log(`getProduct Error ${error.message}`);
+    console.log(`getProduct Error: ${error.message}`);
     next(error);
   }
 });

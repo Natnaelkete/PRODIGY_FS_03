@@ -1,17 +1,16 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import useGetFilteredProduct from "../hooks/products/getFilteredProduct";
 
-function Pagination() {
+function Pagination(data) {
   const { search, pathname } = useLocation();
-  const { data } = useGetFilteredProduct(search);
+  // const { data } = useGetFilteredProduct(search);
 
-  const { pageCount, page } = data.meta.pagination;
+  const { pages, page } = data;
 
   const navigate = useNavigate();
 
   function nextPage() {
     let next = page + 1;
-    if (next < 1) next = pageCount;
+    if (next < 1) next = pages;
 
     const searchParams = new URLSearchParams(search);
     searchParams.set("page", next);
@@ -20,7 +19,7 @@ function Pagination() {
 
   function prevePag() {
     let prev = page - 1;
-    if (prev < 1) prev = pageCount;
+    if (prev < 1) prev = pages;
 
     const searchParams = new URLSearchParams(search);
     searchParams.set("page", prev);
@@ -33,8 +32,7 @@ function Pagination() {
         «
       </button>
       <div className="join">
-        {/* Render page buttons based on pageCount */}
-        {Array.from({ length: pageCount }, (_, index) => (
+        {Array.from({ length: pages }, (_, index) => (
           <button
             key={index}
             className={`join-item btn ${
